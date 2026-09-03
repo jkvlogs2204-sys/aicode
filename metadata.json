@@ -1,0 +1,6 @@
+{
+  "name": "Eco Mind",
+  "description": "IoT Environmental System with RFID, Arduino Bluetooth, and Sustainability Insights",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

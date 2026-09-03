@@ -1,0 +1,54 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Sensor Signal Waves -->
+    <path
+        android:strokeColor="#A7F3D0"
+        android:strokeWidth="2"
+        android:pathData="M 54,22 A 32,32 0 0 1 86,54"
+        android:strokeLineCap="round"
+        android:alpha="0.6" />
+    <path
+        android:strokeColor="#6EE7B7"
+        android:strokeWidth="2.5"
+        android:pathData="M 54,16 A 38,38 0 0 1 92,54"
+        android:strokeLineCap="round"
+        android:alpha="0.8" />
+
+    <!-- Eco Leaf Silhouette Base -->
+    <path
+        android:fillColor="#10B981"
+        android:pathData="M54,22 C34,22 26,42 26,64 C26,76 36,86 54,86 C72,86 82,76 82,64 C82,42 74,22 54,22 Z" />
+
+    <!-- Leaf Highlight Layer -->
+    <path
+        android:fillColor="#34D399"
+        android:pathData="M54,22 C54,22 74,38 74,64 C74,76 66,86 54,86 L54,22 Z" />
+
+    <!-- Stem and Circuit Lines -->
+    <path
+        android:strokeColor="#064E3B"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:pathData="M54,28 L54,80 M54,42 L66,34 M54,54 L42,46 M54,64 L65,58 M54,72 L44,66" />
+
+    <!-- Sensor Nodes -->
+    <path
+        android:fillColor="#ECFDF5"
+        android:pathData="M66,34 m-3,0 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0" />
+    <path
+        android:fillColor="#ECFDF5"
+        android:pathData="M42,46 m-3,0 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0" />
+    <path
+        android:fillColor="#ECFDF5"
+        android:pathData="M65,58 m-3,0 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0" />
+    <path
+        android:fillColor="#ECFDF5"
+        android:pathData="M44,66 m-3,0 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0" />
+    <path
+        android:fillColor="#A7F3D0"
+        android:pathData="M54,24 m-3.5,0 a3.5,3.5 0 1,0 7,0 a3.5,3.5 0 1,0 -7,0" />
+</vector>
