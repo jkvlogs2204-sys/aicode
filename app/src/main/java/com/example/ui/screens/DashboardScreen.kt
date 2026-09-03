@@ -119,13 +119,10 @@ fun DashboardScreen(
     val scrollState = rememberScrollState()
 
     if (showHc05Dialog) {
-        com.example.ui.components.Hc05QuickConnectDialog(
+        BluetoothConnectionScreen(
             viewModel = viewModel,
-            onDismiss = { showHc05Dialog = false },
-            onNavigateToHardware = {
-                showHc05Dialog = false
-                onNavigateToHardware()
-            }
+            onNavigateToDashboard = { showHc05Dialog = false },
+            onBack = { showHc05Dialog = false }
         )
     }
 
@@ -238,10 +235,43 @@ private fun ConnectionStatusHeader(
     onConnectClick: () -> Unit,
     onManageClick: () -> Unit
 ) {
+    val isConnected = state is BluetoothState.Connected
+    val isConnecting = state is BluetoothState.Connecting || state is BluetoothState.Reconnecting
+    val isError = state is BluetoothState.Error
+
+    val (statusColor, statusTitle, statusSubtitle) = when (state) {
+        is BluetoothState.Connected -> Triple(
+            EcoBadgeGood,
+            "● HC-05 CONNECTED",
+            "RFID Scanner Active • ${state.deviceName}"
+        )
+        is BluetoothState.Connecting -> Triple(
+            EcoBadgeWarning,
+            "● CONNECTING TO HC-05...",
+            "Connecting to ${state.deviceName}..."
+        )
+        is BluetoothState.Reconnecting -> Triple(
+            EcoBadgeWarning,
+            "● RECONNECTING TO HC-05...",
+            "Attempting auto-reconnect to ${state.deviceName}..."
+        )
+        is BluetoothState.Error -> Triple(
+            EcoBadgeBad,
+            "● HC-05 DISCONNECTED",
+            state.message
+        )
+        else -> Triple(
+            Color.Gray,
+            "● HC-05 DISCONNECTED",
+            "RFID Scanner is not connected. Tap button to setup connection."
+        )
+    }
+
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f)
+            containerColor = statusColor.copy(alpha = 0.08f)
         ),
+        border = BorderStroke(1.dp, statusColor.copy(alpha = 0.3f)),
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier
             .fillMaxWidth()
@@ -251,81 +281,72 @@ private fun ConnectionStatusHeader(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            val (icon, color, label) = when (state) {
-                is BluetoothState.Connected -> Triple(Icons.Default.BluetoothConnected, EcoBadgeGood, "Connected: ${state.deviceName}")
-                is BluetoothState.Connecting -> Triple(Icons.Default.BluetoothConnected, EcoBadgeWarning, "Connecting to ${state.deviceName}...")
-                is BluetoothState.Reconnecting -> Triple(Icons.Default.BluetoothConnected, EcoBadgeWarning, "Reconnecting to ${state.deviceName}...")
-                is BluetoothState.Error -> Triple(Icons.Default.Warning, MaterialTheme.colorScheme.error, "Connection Error (Tap to Retry)")
-                else -> Triple(Icons.Default.BluetoothDisabled, Color.Gray, "Offline (Tap to Connect HC-05)")
-            }
-
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(color.copy(alpha = 0.15f)),
-                contentAlignment = Alignment.Center
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f)
             ) {
-                Icon(imageVector = icon, contentDescription = null, tint = color)
-            }
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = label,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                if (lastRawData.isNotBlank()) {
-                    Text(
-                        text = "Serial Stream: $lastRawData",
-                        fontSize = 10.sp,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                    )
-                } else {
-                    Text(
-                        text = "HC-05 Bluetooth Module (9600 Baud SPP)",
-                        fontSize = 10.sp,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(statusColor.copy(alpha = 0.15f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = if (isConnected) Icons.Default.BluetoothConnected else Icons.Default.BluetoothDisabled,
+                        contentDescription = null,
+                        tint = statusColor,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column {
+                    Text(
+                        text = statusTitle,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = statusColor
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = if (lastRawData.isNotBlank() && isConnected) "Serial Stream: $lastRawData" else statusSubtitle,
+                        fontSize = 11.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.width(6.dp))
+            Spacer(modifier = Modifier.width(8.dp))
 
-            when (state) {
-                is BluetoothState.Connected -> {
-                    OutlinedButton(
-                        onClick = onConnectClick,
-                        modifier = Modifier.testTag("hardware_setup_button")
-                    ) {
-                        Text("Manage", fontSize = 11.sp)
-                    }
+            if (isConnected) {
+                OutlinedButton(
+                    onClick = onConnectClick,
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier.testTag("hardware_setup_button")
+                ) {
+                    Text("MANAGE SCANNER", fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 }
-                is BluetoothState.Connecting, is BluetoothState.Reconnecting -> {
-                    OutlinedButton(
-                        onClick = onConnectClick,
-                        modifier = Modifier.testTag("hardware_setup_button")
-                    ) {
-                        Text("Status", fontSize = 11.sp)
-                    }
-                }
-                else -> {
-                    Button(
-                        onClick = onConnectClick,
-                        shape = RoundedCornerShape(10.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                        modifier = Modifier.testTag("hardware_setup_button")
-                    ) {
-                        Icon(imageVector = Icons.Default.Bluetooth, contentDescription = null, modifier = Modifier.size(13.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Connect", fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                    }
+            } else {
+                Button(
+                    onClick = onConnectClick,
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                    modifier = Modifier.testTag("hardware_setup_button")
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Bluetooth,
+                        contentDescription = null,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("CONNECT RFID SCANNER", fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }

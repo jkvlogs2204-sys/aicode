@@ -702,60 +702,14 @@ class BleScanningViewModel(application: Application) : AndroidViewModel(applicat
 
     /**
      * Send command to the connected HC-05 / BLE node.
+     * Note: Enforces strict unidirectional hardware architecture (Arduino -> App ONLY).
      */
     @SuppressLint("MissingPermission")
     fun sendIotCommand(command: String): Boolean {
-        val payload = "$command\r\n"
-        var sent = false
-
-        // 1. Try Classic SPP Socket
-        val socketOut = socketOutputStream
-        if (socketOut != null) {
-            try {
-                socketOut.write(payload.toByteArray())
-                socketOut.flush()
-                sent = true
-                addLog("TX (SPP): $command")
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed writing command over SPP: ${e.message}")
-            }
-        }
-
-        // 2. Try BLE GATT write
-        val gatt = activeGatt
-        if (!sent && gatt != null) {
-            try {
-                for (service in gatt.services) {
-                    for (char in service.characteristics) {
-                        val props = char.properties
-                        if ((props and BluetoothGattCharacteristic.PROPERTY_WRITE) != 0 ||
-                            (props and BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE) != 0
-                        ) {
-                            @Suppress("DEPRECATION")
-                            char.value = payload.toByteArray()
-                            @Suppress("DEPRECATION")
-                            val res = gatt.writeCharacteristic(char)
-                            if (res) {
-                                sent = true
-                                addLog("TX (GATT): $command")
-                                break
-                            }
-                        }
-                    }
-                    if (sent) break
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed writing command over GATT: ${e.message}")
-            }
-        }
-
-        if (sent) {
-            _commandsSentCount.value += 1
-        } else {
-            addLog("Failed sending '$command': Not connected")
-        }
-
-        return sent
+        // Reverse decision/actuator transmission to Arduino is strictly disabled.
+        // The architecture is strictly unidirectional: Arduino -> HC-05 -> App.
+        addLog("Unidirectional Mode Active: Command transmission '$command' skipped (Arduino -> App only).")
+        return false
     }
 
     /**

@@ -187,6 +187,9 @@ fun EcoMindApp(
 
     if (neededPermissions.isNotEmpty()) {
       permissionLauncher.launch(neededPermissions.toTypedArray())
+    } else {
+      // If permissions are already granted, attempt safe auto-reconnection to last saved HC-05 device
+      viewModel.bluetoothManager.autoConnectLastDevice()
     }
   }
 

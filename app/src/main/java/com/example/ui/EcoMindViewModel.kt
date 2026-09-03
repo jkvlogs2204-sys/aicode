@@ -456,18 +456,30 @@ class EcoMindViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    private var lastScanTimestamp = 0L
+    private var lastScannedUid = ""
+
     fun onRfidTagScanned(productId: String) {
+        val cleanUid = productId.trim().uppercase()
+        val now = System.currentTimeMillis()
+        if (cleanUid == lastScannedUid && (now - lastScanTimestamp) < 2500L) {
+            Log.d("EcoMindViewModel", "Duplicate scan suppressed for $cleanUid (2.5s cooldown active)")
+            return
+        }
+        lastScanTimestamp = now
+        lastScannedUid = cleanUid
+
         viewModelScope.launch {
             // Fetch mapped environmental zone / device
-            val mapping = rfidMappingRepository.getMappingForTag(productId).firstOrNull()
+            val mapping = rfidMappingRepository.getMappingForTag(cleanUid).firstOrNull()
             _activeTagMapping.value = mapping
 
             // 1. Check local Room database
-            var product = repository.getProductByIdDirect(productId)
+            var product = repository.getProductByIdDirect(cleanUid)
 
             // 2. If not found locally, try remote backend
             if (product == null) {
-                product = repository.fetchFromRemoteBackend(_backendUrl.value, productId)
+                product = repository.fetchFromRemoteBackend(_backendUrl.value, cleanUid)
             }
 
             if (product != null) {
@@ -485,14 +497,14 @@ class EcoMindViewModel(application: Application) : AndroidViewModel(application)
                 // No return commands (GREEN/YELLOW/RED) are transmitted back to Arduino.
             } else {
                 _scannedProduct.value = ProductEntity(
-                    id = productId,
-                    name = "Unknown Product ($productId)",
+                    id = cleanUid,
+                    name = "Unknown Product ($cleanUid)",
                     category = "Uncategorized",
                     carbon = "150g CO2",
                     water = "5 litres",
                     ecoScore = 50,
                     recycling = "Check local municipality rules",
-                    impact = "Product ID $productId is not yet registered in database.",
+                    impact = "Product ID $cleanUid is not yet registered in database.",
                     alternative = "Search registered eco alternatives",
                     isEcoFriendly = false
                 )
