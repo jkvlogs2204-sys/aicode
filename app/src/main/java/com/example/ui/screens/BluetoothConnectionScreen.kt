@@ -53,7 +53,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -84,6 +86,7 @@ fun BluetoothConnectionScreen(
     val lastDevice = remember(bluetoothState) { viewModel.bluetoothManager.getLastConnectedDevice() }
     val scannedProduct by viewModel.scannedProduct.collectAsState()
     val lastRawData by viewModel.lastRawData.collectAsState()
+    var manualMacText by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
@@ -345,7 +348,6 @@ fun BluetoothConnectionScreen(
             }
 
             // 3.5 DIRECT MAC ADDRESS CONNECT
-            var manualMacText by remember { mutableStateOf("") }
             Card(
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
