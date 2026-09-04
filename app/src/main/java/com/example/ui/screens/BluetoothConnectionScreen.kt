@@ -344,6 +344,58 @@ fun BluetoothConnectionScreen(
                 }
             }
 
+            // 3.5 DIRECT MAC ADDRESS CONNECT
+            var manualMacText by remember { mutableStateOf("") }
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(14.dp)) {
+                    Text(
+                        text = "DIRECT CONNECT BY MAC ADDRESS",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        letterSpacing = 0.5.sp
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "If HC-05 does not show in scan results, enter its Bluetooth MAC address directly (e.g. 00:21:13:00:27:14 or 98:D3:31:F8:3A:90).",
+                        fontSize = 11.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        androidx.compose.material3.OutlinedTextField(
+                            value = manualMacText,
+                            onValueChange = { manualMacText = it },
+                            placeholder = { Text("00:21:13:00:27:14", fontSize = 12.sp) },
+                            singleLine = true,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(10.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(
+                            onClick = {
+                                if (manualMacText.isNotBlank()) {
+                                    viewModel.bluetoothManager.connectByAddress(manualMacText.trim())
+                                }
+                            },
+                            enabled = manualMacText.isNotBlank(),
+                            shape = RoundedCornerShape(10.dp),
+                            modifier = Modifier.testTag("btn_connect_manual_mac")
+                        ) {
+                            Text("CONNECT", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+            }
+
             // 4. PRIORITIZED DISCOVERED & PAIRED DEVICES LIST
             Column(modifier = Modifier.fillMaxWidth()) {
                 Row(

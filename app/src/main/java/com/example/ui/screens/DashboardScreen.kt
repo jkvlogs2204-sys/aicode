@@ -115,16 +115,7 @@ fun DashboardScreen(
 
     var customTagInput by remember { mutableStateOf("") }
     var showEditDialog by remember { mutableStateOf(false) }
-    var showHc05Dialog by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
-
-    if (showHc05Dialog) {
-        BluetoothConnectionScreen(
-            viewModel = viewModel,
-            onNavigateToDashboard = { showHc05Dialog = false },
-            onBack = { showHc05Dialog = false }
-        )
-    }
 
     if (showEditDialog && scannedProduct != null) {
         ProductEditDialog(
@@ -154,7 +145,7 @@ fun DashboardScreen(
         ConnectionStatusHeader(
             state = bluetoothState,
             lastRawData = lastRawData,
-            onConnectClick = { showHc05Dialog = true },
+            onConnectClick = onNavigateToHardware,
             onManageClick = onNavigateToHardware
         )
 

@@ -147,7 +147,7 @@ fun EcoMindApp(
   val scope = rememberCoroutineScope()
   val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
   val prefs = remember { context.getSharedPreferences("ecomind_app_prefs", android.content.Context.MODE_PRIVATE) }
-  var showOnboarding by remember { mutableStateOf(!prefs.getBoolean("has_seen_onboarding", false)) }
+  var showOnboarding by remember { mutableStateOf(false) }
 
   val bluetoothState by viewModel.bluetoothState.collectAsState()
   val currentUser by viewModel.currentUser.collectAsState()
@@ -160,7 +160,7 @@ fun EcoMindApp(
   val permissionLauncher = rememberLauncherForActivityResult(
     ActivityResultContracts.RequestMultiplePermissions()
   ) { permissions ->
-    // Permissions handled
+    viewModel.bluetoothManager.autoConnectLastDevice()
   }
 
   LaunchedEffect(Unit) {
@@ -179,10 +179,12 @@ fun EcoMindApp(
       if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
         neededPermissions.add(Manifest.permission.BLUETOOTH_SCAN)
       }
-    } else {
-      if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-        neededPermissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
-      }
+    }
+    if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+      neededPermissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
+    }
+    if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+      neededPermissions.add(Manifest.permission.ACCESS_COARSE_LOCATION)
     }
 
     if (neededPermissions.isNotEmpty()) {
