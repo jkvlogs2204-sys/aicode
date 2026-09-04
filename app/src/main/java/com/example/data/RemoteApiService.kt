@@ -45,6 +45,32 @@ data class DatabaseSyncPayload(
     val timestamp: Long = System.currentTimeMillis()
 )
 
+interface EcoBackendApi {
+    @GET("health")
+    suspend fun checkHealth(): Map<String, Any>
+
+    @GET("api/products/rfid/{uid}")
+    suspend fun getProductByRfidUid(@Path("uid") uid: String): ProductApiResponse
+
+    @GET("product/{id}")
+    suspend fun getProductById(@Path("id") id: String): ProductApiResponse
+
+    @GET("products")
+    suspend fun getAllProducts(): List<ProductApiResponse>
+
+    @POST("product")
+    suspend fun createOrUpdateProduct(@Body product: ProductApiResponse): ProductApiResponse
+
+    @PUT("product/{id}")
+    suspend fun updateProductOnBackend(@Path("id") id: String, @Body product: ProductApiResponse): ProductApiResponse
+
+    @POST("sensor-readings")
+    suspend fun uploadSensorReadings(@Body readings: List<SensorReadingPayload>): Map<String, Any>
+
+    @POST("sync-database")
+    suspend fun syncDatabasePayload(@Body payload: DatabaseSyncPayload): Map<String, Any>
+}
+
 // OpenAI ChatGPT REST API Data Classes
 data class OpenAiMessage(
     val role: String,
