@@ -145,7 +145,7 @@ fun GeminiApiKeyDialog(
                                     ) {
                                         Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = EcoBadgeGood, modifier = Modifier.size(12.dp))
                                         Spacer(modifier = Modifier.width(4.dp))
-                                        Text("GEMINI & CHATGPT AI", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = EcoBadgeGood)
+                                        Text("CHATGPT GPT-4O-MINI", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = EcoBadgeGood)
                                     }
                                 }
 
@@ -166,14 +166,14 @@ fun GeminiApiKeyDialog(
                             Spacer(modifier = Modifier.height(8.dp))
 
                             Text(
-                                text = "Gemini & ChatGPT AI Settings",
+                                text = "OpenAI ChatGPT API Settings",
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
                             )
 
                             Text(
-                                text = "Supports both Google Gemini API keys (AIzaSy...) and OpenAI ChatGPT API keys (sk-...). Enter your API key below.",
+                                text = "Configured for all users across the app. Enter your OpenAI ChatGPT API key (sk-...) below.",
                                 fontSize = 11.sp,
                                 color = Color.White.copy(alpha = 0.8f)
                             )
@@ -215,13 +215,13 @@ fun GeminiApiKeyDialog(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 // Input Field for New API Key
-                Text("Enter or Paste Gemini API Key:", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                Text("Enter or Paste ChatGPT API Key (sk-...):", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                 Spacer(modifier = Modifier.height(6.dp))
 
                 OutlinedTextField(
                     value = keyInput,
                     onValueChange = { keyInput = it },
-                    placeholder = { Text("AIzaSy...", fontSize = 12.sp) },
+                    placeholder = { Text("sk-proj-...", fontSize = 12.sp) },
                     singleLine = true,
                     visualTransformation = if (isKeyVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -262,7 +262,7 @@ fun GeminiApiKeyDialog(
                         onClick = {
                             if (keyInput.isNotBlank()) {
                                 viewModel.updateGeminiApiKey(keyInput.trim())
-                                Toast.makeText(context, "Gemini API key updated and tested!", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "ChatGPT API key updated and tested!", Toast.LENGTH_SHORT).show()
                                 keyInput = ""
                             }
                         },
@@ -280,7 +280,7 @@ fun GeminiApiKeyDialog(
                     OutlinedButton(
                         onClick = {
                             viewModel.clearGeminiApiKey()
-                            Toast.makeText(context, "Custom key removed. Reverted to BuildConfig.", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Custom key removed.", Toast.LENGTH_SHORT).show()
                             keyInput = ""
                         },
                         enabled = !isTesting,
@@ -307,11 +307,11 @@ fun GeminiApiKeyDialog(
                     if (isTesting) {
                         CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp)
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("Testing Gemini Live API...", fontSize = 11.sp)
+                        Text("Testing ChatGPT Live API...", fontSize = 11.sp)
                     } else {
                         Icon(Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(14.dp), tint = EcoBadgeGood)
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("Ping Live Gemini AI", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        Text("Ping Live ChatGPT AI", fontSize = 11.sp, fontWeight = FontWeight.Bold)
                     }
                 }
 
@@ -337,7 +337,7 @@ fun GeminiApiKeyDialog(
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
-                                    text = if (status.success) "API Connected (${status.latencyMs}ms)" else "Connection Failed",
+                                    text = if (status.success) "ChatGPT Connected (${status.latencyMs}ms)" else "Connection Failed",
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = if (status.success) EcoBadgeGood else MaterialTheme.colorScheme.error
@@ -373,16 +373,16 @@ fun GeminiApiKeyDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Don't have an API key?", fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
-                        Text("Get one in seconds at Google AI Studio", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("Need a ChatGPT API key?", fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                        Text("Get your key at platform.openai.com", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     TextButton(
                         onClick = {
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://aistudio.google.com/app/apikey"))
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://platform.openai.com/api-keys"))
                             try {
                                 context.startActivity(intent)
                             } catch (e: Exception) {
-                                Toast.makeText(context, "Visit: https://aistudio.google.com/app/apikey", Toast.LENGTH_LONG).show()
+                                Toast.makeText(context, "Visit: https://platform.openai.com/api-keys", Toast.LENGTH_LONG).show()
                             }
                         },
                         modifier = Modifier.testTag("btn_get_gemini_key_link")
