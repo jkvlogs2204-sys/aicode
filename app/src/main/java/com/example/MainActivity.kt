@@ -222,7 +222,7 @@ fun EcoMindApp(
               modifier = Modifier
                 .weight(1f)
                 .clickable {
-                  showAuthDialog = true
+                  selectedTab = 5
                   scope.launch { drawerState.close() }
                 }
             ) {
@@ -683,7 +683,7 @@ fun EcoMindApp(
             }
 
             IconButton(
-              onClick = { showAuthDialog = true },
+              onClick = { selectedTab = 5 },
               modifier = Modifier
                 .padding(end = 2.dp)
                 .testTag("btn_top_bar_auth")
@@ -819,17 +819,6 @@ fun EcoMindApp(
           )
           4 -> AiGuideScreen(viewModel = viewModel)
           5 -> SettingsScreen(viewModel = viewModel)
-        }
-
-        if (showOnboarding) {
-          OnboardingCarouselDialog(onDismiss = { showOnboarding = false })
-        }
-
-        if (showAuthDialog) {
-          com.example.ui.components.FirebaseAuthDialog(
-            viewModel = viewModel,
-            onDismiss = { showAuthDialog = false }
-          )
         }
       }
     }

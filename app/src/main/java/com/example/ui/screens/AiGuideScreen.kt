@@ -547,13 +547,6 @@ fun AiGuideScreen(
             }
         }
     }
-
-    if (showChatGptKeyDialog) {
-        ChatGptApiKeyDialog(
-            viewModel = viewModel,
-            onDismiss = { showChatGptKeyDialog = false }
-        )
-    }
 }
 
 @Composable
