@@ -179,8 +179,8 @@ fun DashboardScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 2a. Gemini AI Environmental Sustainability Suggestions Card (Firestore Data Source)
-        GeminiSustainabilityAdviceCard(
+        // 2a. ChatGPT AI Environmental Sustainability Suggestions Card (Firestore Data Source)
+        ChatGptSustainabilityAdviceCard(
             advice = sustainabilityAdvice,
             isLoading = isGeneratingSustainabilityAdvice,
             onRefreshAdvice = { viewModel.generateSustainabilityAdviceFromFirestore() }
@@ -455,7 +455,7 @@ private fun ProductDashboardCard(
     aiAnalysis: com.example.ai.AiProductAnalysis?
 ) {
     val ecoScore = product.ecoScore
-    val (calcDecision, calcGrade, calcRec) = com.example.ai.GeminiEcoAssistant.computeEcoDecision(ecoScore)
+    val (calcDecision, calcGrade, calcRec) = com.example.ai.ChatGptEcoAssistant.computeEcoDecision(ecoScore)
     val decision = aiAnalysis?.decision ?: calcDecision
     val grade = aiAnalysis?.grade ?: calcGrade
     val decisionRec = aiAnalysis?.decisionRecommendation ?: calcRec
@@ -823,7 +823,7 @@ private fun ProductDashboardCard(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "Gemini AI Lifecycle Insight",
+                                text = "ChatGPT AI Lifecycle Insight",
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -1462,7 +1462,7 @@ private fun HeroAestheticBanner(
 }
 
 @Composable
-fun GeminiSustainabilityAdviceCard(
+fun ChatGptSustainabilityAdviceCard(
     advice: com.example.ai.EnvironmentalSustainabilityAdvice?,
     isLoading: Boolean,
     onRefreshAdvice: () -> Unit,
@@ -1474,7 +1474,7 @@ fun GeminiSustainabilityAdviceCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         modifier = modifier
             .fillMaxWidth()
-            .testTag("card_gemini_sustainability_advice")
+            .testTag("card_chatgpt_sustainability_advice")
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
             // Header Row
@@ -1693,7 +1693,7 @@ fun GeminiSustainabilityAdviceCard(
                     onClick = onRefreshAdvice,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .testTag("btn_refresh_gemini_sustainability_advice")
+                        .testTag("btn_refresh_chatgpt_sustainability_advice")
                 ) {
                     Icon(
                         imageVector = Icons.Default.Refresh,

@@ -68,7 +68,7 @@ import androidx.compose.ui.unit.sp
 import com.example.ui.ChatMessage
 import com.example.ui.EcoMindViewModel
 import com.example.ui.components.FootprintComparisonChart
-import com.example.ui.components.GeminiApiKeyDialog
+import com.example.ui.components.ChatGptApiKeyDialog
 import com.example.ui.components.RealtimeLineChartCanvas
 import com.example.ui.theme.EcoBadgeBad
 import com.example.ui.theme.EcoBadgeGood
@@ -85,13 +85,13 @@ fun AiGuideScreen(
     val allProducts by viewModel.allProducts.collectAsState()
     val bleSensorData by viewModel.bleLatestSensorData.collectAsState()
     val roomSensorHistory by viewModel.roomSensorHistory.collectAsState()
-    val geminiConnectionStatus by viewModel.geminiConnectionStatus.collectAsState()
-    val isTestingGemini by viewModel.isTestingGemini.collectAsState()
-    val isGeminiConfigured by viewModel.isGeminiConfigured.collectAsState()
+    val chatGptConnectionStatus by viewModel.geminiConnectionStatus.collectAsState()
+    val isTestingChatGpt by viewModel.isTestingGemini.collectAsState()
+    val isChatGptConfigured by viewModel.isGeminiConfigured.collectAsState()
 
     var inputText by remember { mutableStateOf("") }
     var showChartsSection by remember { mutableStateOf(false) }
-    var showGeminiKeyDialog by remember { mutableStateOf(false) }
+    var showChatGptKeyDialog by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
 
     LaunchedEffect(messages.size, isChatLoading) {
@@ -108,67 +108,68 @@ fun AiGuideScreen(
         "How does RFID recycling classification work?"
     )
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        // AI Header Card
-        Card(
-            shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-            modifier = Modifier.fillMaxWidth().testTag("ai_header_card")
+    Box(modifier = modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(
-                        Brush.linearGradient(
-                            colors = listOf(
-                                Color(0xFF16261F),
-                                Color(0xFF1E3A2F),
-                                Color(0xFF0D1C15)
+            // Header Banner
+            Card(
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            Brush.linearGradient(
+                                colors = listOf(
+                                    Color(0xFF16261F),
+                                    Color(0xFF1E3A2F),
+                                    Color(0xFF0D1C15)
+                                )
                             )
                         )
-                    )
-                    .padding(18.dp)
-            ) {
-                Column {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Surface(
-                            shape = RoundedCornerShape(12.dp),
-                            color = EcoBadgeGood.copy(alpha = 0.2f),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, EcoBadgeGood.copy(alpha = 0.4f))
+                        .padding(16.dp)
+                ) {
+                    Column {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                            Surface(
+                                shape = RoundedCornerShape(8.dp),
+                                color = EcoBadgeGood.copy(alpha = 0.2f),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, EcoBadgeGood.copy(alpha = 0.4f))
                             ) {
-                                Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = EcoBadgeGood, modifier = Modifier.size(12.dp))
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text("GEMINI 3.5 FLASH", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = EcoBadgeGood)
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = EcoBadgeGood, modifier = Modifier.size(12.dp))
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text("CHATGPT GPT-4O-MINI", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = EcoBadgeGood)
+                                }
                             }
-                        }
 
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            OutlinedButton(
-                                onClick = { showGeminiKeyDialog = true },
-                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
-                                modifier = Modifier.testTag("btn_configure_gemini_key")
-                            ) {
-                                Icon(Icons.Default.Key, contentDescription = null, modifier = Modifier.size(12.dp), tint = if (isGeminiConfigured) EcoBadgeGood else EcoBadgeWarning)
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = if (isGeminiConfigured) "Key Active" else "Set Key",
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (isGeminiConfigured) EcoBadgeGood else EcoBadgeWarning
-                                )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                OutlinedButton(
+                                    onClick = { showChatGptKeyDialog = true },
+                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                                    modifier = Modifier.testTag("btn_configure_chatgpt_key")
+                                ) {
+                                    Icon(Icons.Default.Key, contentDescription = null, modifier = Modifier.size(12.dp), tint = if (isChatGptConfigured) EcoBadgeGood else EcoBadgeWarning)
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = if (isChatGptConfigured) "Key Active" else "Set Key",
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (isChatGptConfigured) EcoBadgeGood else EcoBadgeWarning
+                                    )
+                                }
                             }
 
                             Spacer(modifier = Modifier.width(6.dp))
@@ -231,14 +232,14 @@ fun AiGuideScreen(
                         color = Color.White.copy(alpha = 0.8f)
                     )
 
-                    // Gemini Live API Connectivity Info Banner
-                    val currentStatus = geminiConnectionStatus
+                    // ChatGPT Live API Connectivity Info Banner
+                    val currentStatus = chatGptConnectionStatus
                     Spacer(modifier = Modifier.height(6.dp))
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .clip(RoundedCornerShape(6.dp))
-                            .clickable { showGeminiKeyDialog = true }
+                            .clickable { showChatGptKeyDialog = true }
                             .padding(vertical = 2.dp)
                     ) {
                         Box(
@@ -250,11 +251,11 @@ fun AiGuideScreen(
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = if (currentStatus?.success == true) {
-                                "Google DeepMind: ${currentStatus.model} • Latency: ${currentStatus.latencyMs}ms"
-                            } else if (isGeminiConfigured) {
-                                "Gemini API: ${currentStatus?.errorMessage ?: "Testing connection..."} (Tap to manage key)"
+                                "OpenAI ChatGPT: ${currentStatus.model} • Latency: ${currentStatus.latencyMs}ms"
+                            } else if (isChatGptConfigured) {
+                                "ChatGPT API: ${currentStatus?.errorMessage ?: "Testing connection..."} (Tap to manage key)"
                             } else {
-                                "Gemini API: Key not configured • Tap to set key"
+                                "ChatGPT API: Key not configured • Tap to set key"
                             },
                             fontSize = 10.sp,
                             color = if (currentStatus?.success == true) EcoBadgeGood.copy(alpha = 0.9f) else EcoBadgeWarning,
@@ -522,10 +523,10 @@ fun AiGuideScreen(
         }
     }
 
-    if (showGeminiKeyDialog) {
-        GeminiApiKeyDialog(
+    if (showChatGptKeyDialog) {
+        ChatGptApiKeyDialog(
             viewModel = viewModel,
-            onDismiss = { showGeminiKeyDialog = false }
+            onDismiss = { showChatGptKeyDialog = false }
         )
     }
 }
@@ -583,7 +584,7 @@ private fun ChatBubble(msg: ChatMessage) {
                         )
                         Spacer(modifier = Modifier.width(3.dp))
                         Text(
-                            text = "Gemini 3.5 Flash",
+                            text = "ChatGPT gpt-4o-mini",
                             fontSize = 9.sp,
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)

@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -26,7 +25,6 @@ import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.OpenInNew
-import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.Warning
@@ -53,7 +51,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -66,19 +63,19 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.ai.GeminiEcoAssistant
+import com.example.ai.ChatGptEcoAssistant
 import com.example.ui.EcoMindViewModel
 import com.example.ui.theme.EcoBadgeGood
 import com.example.ui.theme.EcoBadgeWarning
 
 @Composable
-fun GeminiApiKeyDialog(
+fun ChatGptApiKeyDialog(
     viewModel: EcoMindViewModel,
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
     val clipboardManager = LocalClipboardManager.current
-    val geminiStatus by viewModel.geminiConnectionStatus.collectAsState()
+    val chatGptStatus by viewModel.geminiConnectionStatus.collectAsState()
     val isTesting by viewModel.isTestingGemini.collectAsState()
     val isConfigured by viewModel.isGeminiConfigured.collectAsState()
     val keySource by viewModel.geminiApiKeySource.collectAsState()
@@ -86,9 +83,9 @@ fun GeminiApiKeyDialog(
     var keyInput by remember { mutableStateOf("") }
     var isKeyVisible by remember { mutableStateOf(false) }
 
-    val activeKey = GeminiEcoAssistant.getApiKey()
+    val activeKey = ChatGptEcoAssistant.getApiKey()
     val maskedKey = if (activeKey.isNotBlank()) {
-        val prefix = activeKey.take(6)
+        val prefix = activeKey.take(7)
         val suffix = activeKey.takeLast(4)
         "$prefix••••••••••••$suffix"
     } else {
@@ -100,7 +97,7 @@ fun GeminiApiKeyDialog(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
-            .testTag("gemini_api_key_dialog"),
+            .testTag("chatgpt_api_key_dialog"),
         text = {
             Column(
                 modifier = Modifier
@@ -248,7 +245,7 @@ fun GeminiApiKeyDialog(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .testTag("input_gemini_api_key")
+                        .testTag("input_chatgpt_api_key")
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -270,7 +267,7 @@ fun GeminiApiKeyDialog(
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                         modifier = Modifier
                             .weight(1f)
-                            .testTag("btn_save_gemini_key")
+                            .testTag("btn_save_chatgpt_key")
                     ) {
                         Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(14.dp))
                         Spacer(modifier = Modifier.width(4.dp))
@@ -286,7 +283,7 @@ fun GeminiApiKeyDialog(
                         enabled = !isTesting,
                         modifier = Modifier
                             .weight(1f)
-                            .testTag("btn_clear_gemini_key")
+                            .testTag("btn_clear_chatgpt_key")
                     ) {
                         Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(14.dp))
                         Spacer(modifier = Modifier.width(4.dp))
@@ -302,7 +299,7 @@ fun GeminiApiKeyDialog(
                     enabled = !isTesting,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .testTag("btn_dialog_test_gemini")
+                        .testTag("btn_dialog_test_chatgpt")
                 ) {
                     if (isTesting) {
                         CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp)
@@ -316,7 +313,7 @@ fun GeminiApiKeyDialog(
                 }
 
                 // Test Result Display
-                geminiStatus?.let { status ->
+                chatGptStatus?.let { status ->
                     Spacer(modifier = Modifier.height(8.dp))
                     Surface(
                         shape = RoundedCornerShape(8.dp),
@@ -385,7 +382,7 @@ fun GeminiApiKeyDialog(
                                 Toast.makeText(context, "Visit: https://platform.openai.com/api-keys", Toast.LENGTH_LONG).show()
                             }
                         },
-                        modifier = Modifier.testTag("btn_get_gemini_key_link")
+                        modifier = Modifier.testTag("btn_get_chatgpt_key_link")
                     ) {
                         Icon(Icons.Default.OpenInNew, contentDescription = null, modifier = Modifier.size(14.dp))
                         Spacer(modifier = Modifier.width(4.dp))
@@ -397,7 +394,7 @@ fun GeminiApiKeyDialog(
         confirmButton = {
             TextButton(
                 onClick = onDismiss,
-                modifier = Modifier.testTag("btn_dismiss_gemini_dialog")
+                modifier = Modifier.testTag("btn_dismiss_chatgpt_dialog")
             ) {
                 Text("Done")
             }

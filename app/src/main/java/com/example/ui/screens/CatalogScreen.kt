@@ -68,7 +68,7 @@ import androidx.compose.ui.unit.sp
 import com.example.data.ProductEntity
 import com.example.ui.EcoMindViewModel
 import androidx.compose.material.icons.filled.AutoAwesome
-import com.example.ui.components.GeminiProductFetchDialog
+import com.example.ui.components.ChatGptProductFetchDialog
 import com.example.ui.components.ProductEditDialog
 import com.example.ui.theme.EcoBadgeBad
 import com.example.ui.theme.EcoBadgeGood
@@ -90,7 +90,7 @@ fun CatalogScreen(
     val isBackendSyncing by viewModel.isBackendSyncing.collectAsState()
 
     var showEditDialog by remember { mutableStateOf(false) }
-    var showGeminiFetchDialog by remember { mutableStateOf(false) }
+    var showChatGptFetchDialog by remember { mutableStateOf(false) }
     var productToEdit by remember { mutableStateOf<ProductEntity?>(null) }
 
     val categories = listOf("All", "Food", "Plastic", "Glass", "Paper", "Electronics", "Metal")
@@ -164,10 +164,10 @@ fun CatalogScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Button(
-                                    onClick = { showGeminiFetchDialog = true },
+                                    onClick = { showChatGptFetchDialog = true },
                                     contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
                                     colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = EcoBadgeGood),
-                                    modifier = Modifier.weight(1.3f).testTag("btn_open_gemini_fetch_dialog")
+                                    modifier = Modifier.weight(1.3f).testTag("btn_open_chatgpt_fetch_dialog")
                                 ) {
                                     Icon(Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(14.dp), tint = Color.Black)
                                     Spacer(modifier = Modifier.width(4.dp))
@@ -352,15 +352,15 @@ fun CatalogScreen(
             )
         }
 
-        // Gemini AI Product Fetch Dialog
-        if (showGeminiFetchDialog) {
-            GeminiProductFetchDialog(
+        // ChatGPT AI Product Fetch Dialog
+        if (showChatGptFetchDialog) {
+            ChatGptProductFetchDialog(
                 initialQuery = searchQuery,
-                onDismiss = { showGeminiFetchDialog = false },
+                onDismiss = { showChatGptFetchDialog = false },
                 onSaveProduct = { fetched ->
                     viewModel.updateProduct(fetched, syncToBackend = true)
                     viewModel.syncProductsToFirestore()
-                    showGeminiFetchDialog = false
+                    showChatGptFetchDialog = false
                 }
             )
         }

@@ -45,79 +45,6 @@ data class DatabaseSyncPayload(
     val timestamp: Long = System.currentTimeMillis()
 )
 
-// Gemini REST API Data Classes
-data class GeminiRequest(
-    val contents: List<GeminiContent>,
-    val generationConfig: GeminiGenerationConfig? = null,
-    val systemInstruction: GeminiContent? = null
-)
-
-data class GeminiContent(
-    val parts: List<GeminiPart>,
-    val role: String? = "user"
-)
-
-data class GeminiPart(
-    val text: String? = null
-)
-
-data class GeminiGenerationConfig(
-    val temperature: Float = 0.7f,
-    val topP: Float = 0.9f,
-    val maxOutputTokens: Int? = null
-)
-
-data class GeminiResponse(
-    val candidates: List<GeminiCandidate>?,
-    val modelVersion: String? = null
-)
-
-data class GeminiCandidate(
-    val content: GeminiContent?,
-    val finishReason: String? = null
-)
-
-interface EcoBackendApi {
-    @GET("health")
-    suspend fun checkHealth(): Map<String, Any>
-
-    @GET("api/products/rfid/{uid}")
-    suspend fun getProductByRfidUid(@Path("uid") uid: String): ProductApiResponse
-
-    @GET("product/{id}")
-    suspend fun getProductById(@Path("id") id: String): ProductApiResponse
-
-    @GET("products")
-    suspend fun getAllProducts(): List<ProductApiResponse>
-
-    @POST("product")
-    suspend fun createOrUpdateProduct(@Body product: ProductApiResponse): ProductApiResponse
-
-    @PUT("product/{id}")
-    suspend fun updateProductOnBackend(@Path("id") id: String, @Body product: ProductApiResponse): ProductApiResponse
-
-    @POST("sensor-readings")
-    suspend fun uploadSensorReadings(@Body readings: List<SensorReadingPayload>): Map<String, Any>
-
-    @POST("sync-database")
-    suspend fun syncDatabasePayload(@Body payload: DatabaseSyncPayload): Map<String, Any>
-}
-
-interface GeminiApiService {
-    @POST("v1beta/models/gemini-2.5-flash:generateContent")
-    suspend fun generateContent(
-        @Query("key") apiKey: String,
-        @Body request: GeminiRequest
-    ): GeminiResponse
-
-    @POST("v1beta/models/{model}:generateContent")
-    suspend fun generateContentWithModel(
-        @retrofit2.http.Path("model") model: String,
-        @Query("key") apiKey: String,
-        @Body request: GeminiRequest
-    ): GeminiResponse
-}
-
 // OpenAI ChatGPT REST API Data Classes
 data class OpenAiMessage(
     val role: String,
@@ -157,8 +84,8 @@ object NetworkClient {
         .readTimeout(15, TimeUnit.SECONDS)
         .build()
 
-    // 60-second timeouts recommended for Gemini AI / OpenAI API calls
-    private val geminiOkHttpClient = OkHttpClient.Builder()
+    // 60-second timeouts recommended for OpenAI API calls
+    private val openAiOkHttpClient = OkHttpClient.Builder()
         .connectTimeout(60, TimeUnit.SECONDS)
         .readTimeout(60, TimeUnit.SECONDS)
         .writeTimeout(60, TimeUnit.SECONDS)
@@ -180,19 +107,10 @@ object NetworkClient {
             .create(EcoBackendApi::class.java)
     }
 
-    val geminiApi: GeminiApiService by lazy {
-        Retrofit.Builder()
-            .baseUrl("https://generativelanguage.googleapis.com/")
-            .client(geminiOkHttpClient)
-            .addConverterFactory(MoshiConverterFactory.create(moshi))
-            .build()
-            .create(GeminiApiService::class.java)
-    }
-
     val openAiApi: OpenAiApiService by lazy {
         Retrofit.Builder()
             .baseUrl("https://api.openai.com/")
-            .client(geminiOkHttpClient)
+            .client(openAiOkHttpClient)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
             .create(OpenAiApiService::class.java)

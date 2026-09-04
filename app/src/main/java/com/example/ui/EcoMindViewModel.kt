@@ -6,7 +6,7 @@ import android.bluetooth.BluetoothDevice
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ai.AiProductAnalysis
-import com.example.ai.GeminiEcoAssistant
+import com.example.ai.ChatGptEcoAssistant
 import com.example.bluetooth.BluetoothSerialManager
 import com.example.bluetooth.BluetoothState
 import com.example.bluetooth.ble.BleDevice
@@ -229,29 +229,29 @@ class EcoMindViewModel(application: Application) : AndroidViewModel(application)
     private val _isChatLoading = MutableStateFlow(false)
     val isChatLoading: StateFlow<Boolean> = _isChatLoading.asStateFlow()
 
-    private val _geminiConnectionStatus = MutableStateFlow<com.example.ai.GeminiConnectionTestResult?>(null)
-    val geminiConnectionStatus: StateFlow<com.example.ai.GeminiConnectionTestResult?> = _geminiConnectionStatus.asStateFlow()
+    private val _geminiConnectionStatus = MutableStateFlow<com.example.ai.ChatGptConnectionTestResult?>(null)
+    val geminiConnectionStatus: StateFlow<com.example.ai.ChatGptConnectionTestResult?> = _geminiConnectionStatus.asStateFlow()
 
     private val _isTestingGemini = MutableStateFlow(false)
     val isTestingGemini: StateFlow<Boolean> = _isTestingGemini.asStateFlow()
 
-    private val _geminiApiKeySource = MutableStateFlow<String>(com.example.ai.GeminiEcoAssistant.getActiveKeySource())
+    private val _geminiApiKeySource = MutableStateFlow<String>(ChatGptEcoAssistant.getActiveKeySource())
     val geminiApiKeySource: StateFlow<String> = _geminiApiKeySource.asStateFlow()
 
-    private val _isGeminiConfigured = MutableStateFlow<Boolean>(com.example.ai.GeminiEcoAssistant.isGeminiConfigured())
+    private val _isGeminiConfigured = MutableStateFlow<Boolean>(ChatGptEcoAssistant.isChatGptConfigured())
     val isGeminiConfigured: StateFlow<Boolean> = _isGeminiConfigured.asStateFlow()
 
     fun updateGeminiApiKey(newKey: String) {
-        com.example.ai.GeminiEcoAssistant.setCustomApiKey(getApplication(), newKey)
-        _geminiApiKeySource.value = com.example.ai.GeminiEcoAssistant.getActiveKeySource()
-        _isGeminiConfigured.value = com.example.ai.GeminiEcoAssistant.isGeminiConfigured()
+        ChatGptEcoAssistant.setCustomApiKey(getApplication(), newKey)
+        _geminiApiKeySource.value = ChatGptEcoAssistant.getActiveKeySource()
+        _isGeminiConfigured.value = ChatGptEcoAssistant.isChatGptConfigured()
         testGeminiApiLive()
     }
 
     fun clearGeminiApiKey() {
-        com.example.ai.GeminiEcoAssistant.clearCustomApiKey(getApplication())
-        _geminiApiKeySource.value = com.example.ai.GeminiEcoAssistant.getActiveKeySource()
-        _isGeminiConfigured.value = com.example.ai.GeminiEcoAssistant.isGeminiConfigured()
+        ChatGptEcoAssistant.clearCustomApiKey(getApplication())
+        _geminiApiKeySource.value = ChatGptEcoAssistant.getActiveKeySource()
+        _isGeminiConfigured.value = ChatGptEcoAssistant.isChatGptConfigured()
         testGeminiApiLive()
     }
 
@@ -549,7 +549,7 @@ class EcoMindViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             _isGeminiFetchingProduct.value = true
             _geminiFetchStatus.value = "Connecting to AI API: Calculating recycling methods, carbon footprint & water impact for '$query'..."
-            val fetched = GeminiEcoAssistant.fetchProductDetailsViaGemini(query)
+            val fetched = ChatGptEcoAssistant.fetchProductDetailsViaChatGpt(query)
             
             // Save into local Room DB and Cloud Firestore
             repository.updateProduct(fetched)
@@ -567,7 +567,7 @@ class EcoMindViewModel(application: Application) : AndroidViewModel(application)
     fun generateAiAnalysis(product: ProductEntity) {
         viewModelScope.launch {
             _isAiLoading.value = true
-            val analysis = GeminiEcoAssistant.analyzeProduct(product)
+            val analysis = ChatGptEcoAssistant.analyzeProduct(product)
             _aiAnalysis.value = analysis
             _isAiLoading.value = false
         }
@@ -644,7 +644,7 @@ class EcoMindViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             _isChatLoading.value = true
             val historyPairs = currentMsgList.map { Pair(it.sender, it.text) }
-            val aiResponse = GeminiEcoAssistant.askEcoChatHistory(historyPairs, _scannedProduct.value)
+            val aiResponse = ChatGptEcoAssistant.askEcoChatHistory(historyPairs, _scannedProduct.value)
             val updatedList = _chatMessages.value.toMutableList()
             updatedList.add(ChatMessage("ai", aiResponse))
             _chatMessages.value = updatedList
@@ -661,11 +661,11 @@ class EcoMindViewModel(application: Application) : AndroidViewModel(application)
     fun testGeminiApiLive() {
         viewModelScope.launch {
             _isTestingGemini.value = true
-            val result = com.example.ai.GeminiEcoAssistant.testGeminiConnection()
+            val result = ChatGptEcoAssistant.testChatGptConnection()
             _geminiConnectionStatus.value = result
             _isTestingGemini.value = false
-            _isGeminiConfigured.value = com.example.ai.GeminiEcoAssistant.isGeminiConfigured()
-            _geminiApiKeySource.value = com.example.ai.GeminiEcoAssistant.getActiveKeySource()
+            _isGeminiConfigured.value = ChatGptEcoAssistant.isChatGptConfigured()
+            _geminiApiKeySource.value = ChatGptEcoAssistant.getActiveKeySource()
         }
     }
 
@@ -924,7 +924,7 @@ class EcoMindViewModel(application: Application) : AndroidViewModel(application)
             _isGeneratingSustainabilityAdvice.value = true
             val readings = roomSensorHistory.value
             val bleData = bleLatestSensorData.value
-            val advice = com.example.ai.GeminiEcoAssistant.generateEnvironmentalSuggestions(
+            val advice = ChatGptEcoAssistant.generateEnvironmentalSuggestions(
                 readings = readings,
                 latestTemp = bleData?.temperatureC,
                 latestHum = bleData?.humidityPercent,

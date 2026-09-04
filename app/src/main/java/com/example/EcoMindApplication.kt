@@ -2,14 +2,14 @@ package com.example
 
 import android.app.Application
 import android.util.Log
-import com.example.ai.GeminiEcoAssistant
+import com.example.ai.ChatGptEcoAssistant
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
 
 class EcoMindApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        GeminiEcoAssistant.initialize(this)
+        ChatGptEcoAssistant.initialize(this)
         initFirebase()
     }
 

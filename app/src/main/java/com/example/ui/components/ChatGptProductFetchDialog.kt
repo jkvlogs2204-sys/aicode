@@ -2,7 +2,6 @@ package com.example.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -52,7 +50,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.example.ai.GeminiEcoAssistant
+import com.example.ai.ChatGptEcoAssistant
 import com.example.data.ProductEntity
 import com.example.ui.theme.EcoBadgeBad
 import com.example.ui.theme.EcoBadgeGood
@@ -60,7 +58,7 @@ import com.example.ui.theme.EcoBadgeWarning
 import kotlinx.coroutines.launch
 
 @Composable
-fun GeminiProductFetchDialog(
+fun ChatGptProductFetchDialog(
     initialQuery: String = "",
     onDismiss: () -> Unit,
     onSaveProduct: (ProductEntity) -> Unit
@@ -90,7 +88,7 @@ fun GeminiProductFetchDialog(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp)
-                .testTag("gemini_product_fetch_dialog")
+                .testTag("chatgpt_product_fetch_dialog")
         ) {
             Column(
                 modifier = Modifier
@@ -123,7 +121,7 @@ fun GeminiProductFetchDialog(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "AI ECO PRODUCT LOOKUP",
+                                text = "CHATGPT ECO PRODUCT LOOKUP",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = EcoBadgeGood
@@ -131,13 +129,13 @@ fun GeminiProductFetchDialog(
                         }
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
-                            text = "Fetch Recycling & Footprint via AI",
+                            text = "Fetch Recycling & Footprint via ChatGPT",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.ExtraBold,
                             color = Color.White
                         )
                         Text(
-                            text = "Generates CO₂ carbon data, water usage, recycling instructions & eco alternatives.",
+                            text = "Generates CO₂ carbon data, water usage, recycling instructions & eco alternatives using gpt-4o-mini.",
                             fontSize = 11.sp,
                             color = Color.White.copy(alpha = 0.8f)
                         )
@@ -158,7 +156,7 @@ fun GeminiProductFetchDialog(
                     singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .testTag("gemini_dialog_search_input")
+                        .testTag("chatgpt_dialog_search_input")
                 )
 
                 Spacer(modifier = Modifier.height(10.dp))
@@ -183,9 +181,9 @@ fun GeminiProductFetchDialog(
                                         .clickable {
                                             searchQuery = suggestion
                                             isLoading = true
-                                            statusText = "Analyzing '$suggestion' with AI..."
+                                            statusText = "Analyzing '$suggestion' with ChatGPT AI..."
                                             scope.launch {
-                                                val res = GeminiEcoAssistant.fetchProductDetailsViaGemini(suggestion)
+                                                val res = ChatGptEcoAssistant.fetchProductDetailsViaChatGpt(suggestion)
                                                 fetchedProduct = res
                                                 isLoading = false
                                                 statusText = null
@@ -214,9 +212,9 @@ fun GeminiProductFetchDialog(
                     onClick = {
                         if (searchQuery.isNotBlank()) {
                             isLoading = true
-                            statusText = "Calling AI API to fetch environmental specs for '$searchQuery'..."
+                            statusText = "Calling ChatGPT API to fetch environmental specs for '$searchQuery'..."
                             scope.launch {
-                                val res = GeminiEcoAssistant.fetchProductDetailsViaGemini(searchQuery)
+                                val res = ChatGptEcoAssistant.fetchProductDetailsViaChatGpt(searchQuery)
                                 fetchedProduct = res
                                 isLoading = false
                                 statusText = null
@@ -228,16 +226,16 @@ fun GeminiProductFetchDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp)
-                        .testTag("btn_fetch_gemini_api")
+                        .testTag("btn_fetch_chatgpt_api")
                 ) {
                     if (isLoading) {
                         CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Color.Black, strokeWidth = 2.dp)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Querying AI...", color = Color.Black, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                        Text("Querying ChatGPT...", color = Color.Black, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                     } else {
                         Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color.Black, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Fetch via AI", color = Color.Black, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                        Text("Fetch via ChatGPT", color = Color.Black, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                     }
                 }
 
@@ -409,7 +407,7 @@ fun GeminiProductFetchDialog(
                                     colors = ButtonDefaults.buttonColors(containerColor = EcoBadgeGood),
                                     modifier = Modifier
                                         .weight(1.5f)
-                                        .testTag("btn_save_gemini_product")
+                                        .testTag("btn_save_chatgpt_product")
                                 ) {
                                     Text("Save Product & Sync Cloud", color = Color.Black, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                                 }

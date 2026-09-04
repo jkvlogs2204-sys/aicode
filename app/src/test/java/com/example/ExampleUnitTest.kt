@@ -98,37 +98,35 @@ class ExampleUnitTest {
   }
 
   @Test
-  fun testGeminiEcoDecision_scoring() {
-    val (colorGreen, gradeA, _) = com.example.ai.GeminiEcoAssistant.computeEcoDecision(92)
+  fun testChatGptEcoDecision_scoring() {
+    val (colorGreen, gradeA, _) = com.example.ai.ChatGptEcoAssistant.computeEcoDecision(92)
     assertEquals("GREEN", colorGreen)
     assertEquals("A+", gradeA)
 
-    val (colorYellow, gradeB, _) = com.example.ai.GeminiEcoAssistant.computeEcoDecision(65)
+    val (colorYellow, gradeB, _) = com.example.ai.ChatGptEcoAssistant.computeEcoDecision(65)
     assertEquals("YELLOW", colorYellow)
     assertEquals("B", gradeB)
 
-    val (colorRed, gradeE, _) = com.example.ai.GeminiEcoAssistant.computeEcoDecision(15)
+    val (colorRed, gradeE, _) = com.example.ai.ChatGptEcoAssistant.computeEcoDecision(15)
     assertEquals("RED", colorRed)
     assertEquals("E", gradeE)
   }
 
   @Test
-  fun testGeminiRequest_serializationFormat() {
-    val req = com.example.data.GeminiRequest(
-      contents = listOf(
-        com.example.data.GeminiContent(
-          parts = listOf(com.example.data.GeminiPart(text = "Hello Eco Mind")),
-          role = "user"
-        )
+  fun testOpenAiRequest_serializationFormat() {
+    val req = com.example.data.OpenAiRequest(
+      model = "gpt-4o-mini",
+      messages = listOf(
+        com.example.data.OpenAiMessage(role = "system", content = "You are an eco AI"),
+        com.example.data.OpenAiMessage(role = "user", content = "Hello Eco Mind")
       ),
-      systemInstruction = com.example.data.GeminiContent(
-        parts = listOf(com.example.data.GeminiPart(text = "You are an eco AI")),
-        role = "system"
-      )
+      temperature = 0.2f
     )
 
-    assertEquals("user", req.contents.first().role)
-    assertEquals("Hello Eco Mind", req.contents.first().parts.first().text)
-    assertEquals("You are an eco AI", req.systemInstruction?.parts?.first()?.text)
+    assertEquals("gpt-4o-mini", req.model)
+    assertEquals(2, req.messages.size)
+    assertEquals("system", req.messages.first().role)
+    assertEquals("You are an eco AI", req.messages.first().content)
+    assertEquals("Hello Eco Mind", req.messages.last().content)
   }
 }

@@ -43,7 +43,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.rememberCoroutineScope
-import com.example.ai.GeminiEcoAssistant
+import com.example.ai.ChatGptEcoAssistant
 import com.example.ui.theme.EcoBadgeGood
 import kotlinx.coroutines.launch
 
@@ -123,7 +123,7 @@ fun ProductEditDialog(
                         if (name.isNotBlank()) {
                             isAiFetching = true
                             scope.launch {
-                                val fetched = GeminiEcoAssistant.fetchProductDetailsViaGemini(name)
+                                val fetched = ChatGptEcoAssistant.fetchProductDetailsViaChatGpt(name)
                                 name = fetched.name
                                 category = fetched.category
                                 carbon = fetched.carbon

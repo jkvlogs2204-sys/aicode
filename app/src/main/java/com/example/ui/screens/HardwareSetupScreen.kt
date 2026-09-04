@@ -1052,7 +1052,7 @@ fun HardwareSetupScreen(
                 val steps = listOf(
                     "1. RFID Tag Detection" to "MFRC522 detects RFID Tag UID and normalizes tag payload.",
                     "2. Unidirectional Serial / BLE Broadcast" to "Arduino transmits UID over HC-05 / BLE UART to Mobile App.",
-                    "3. Backend & Eco Score Evaluation" to "App queries REST Backend & Gemini AI for lifecycle sustainability analysis.",
+                    "3. Backend & Eco Score Evaluation" to "App queries REST Backend & ChatGPT AI for lifecycle sustainability analysis.",
                     "4. Environmental Decision On-Screen" to "Mobile screen renders GREEN/YELLOW/RED decision, grade & 6R circular matrix (Zero reverse hardware commands)."
                 )
 
