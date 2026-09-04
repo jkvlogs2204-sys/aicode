@@ -88,8 +88,10 @@ object GeminiEcoAssistant {
     }
 
     fun getActiveKeySource(): String {
+        val key = getApiKey()
         return when {
-            customApiKey.isNotBlank() -> "In-App Configured Key"
+            key.startsWith("sk-") -> "In-App OpenAI ChatGPT Key (sk-...)"
+            customApiKey.isNotBlank() -> "In-App Configured Gemini Key"
             BuildConfig.GEMINI_API_KEY.isNotBlank() && BuildConfig.GEMINI_API_KEY != "MY_GEMINI_API_KEY" -> "AI Studio Secrets / BuildConfig"
             else -> "Not Configured"
         }
@@ -107,15 +109,58 @@ object GeminiEcoAssistant {
     fun isGeminiConfigured(): Boolean = getApiKey().isNotEmpty()
 
     private suspend fun executeGeminiRequest(apiKey: String, request: GeminiRequest): Pair<com.example.data.GeminiResponse, String> {
+        val cleanKey = apiKey.trim()
+        if (cleanKey.startsWith("sk-")) {
+            // OpenAI ChatGPT API execution (gpt-4o-mini / gpt-3.5-turbo)
+            val openAiMessages = mutableListOf<com.example.data.OpenAiMessage>()
+            if (request.systemInstruction != null) {
+                val sysText = request.systemInstruction.parts.firstOrNull()?.text ?: ""
+                if (sysText.isNotBlank()) {
+                    openAiMessages.add(com.example.data.OpenAiMessage(role = "system", content = sysText))
+                }
+            }
+            for (c in request.contents) {
+                val text = c.parts.firstOrNull()?.text ?: ""
+                val role = if (c.role == "model") "assistant" else "user"
+                if (text.isNotBlank()) {
+                    openAiMessages.add(com.example.data.OpenAiMessage(role = role, content = text))
+                }
+            }
+            if (openAiMessages.isEmpty()) {
+                openAiMessages.add(com.example.data.OpenAiMessage(role = "user", content = "Hello"))
+            }
+
+            val openAiReq = com.example.data.OpenAiRequest(
+                model = "gpt-4o-mini",
+                messages = openAiMessages,
+                temperature = request.generationConfig?.temperature ?: 0.2f
+            )
+
+            val openAiResp = NetworkClient.openAiApi.createChatCompletion("Bearer $cleanKey", openAiReq)
+            val outputText = openAiResp.choices?.firstOrNull()?.message?.content ?: "Eco Mind AI connected."
+            val convertedResponse = com.example.data.GeminiResponse(
+                candidates = listOf(
+                    com.example.data.GeminiCandidate(
+                        content = com.example.data.GeminiContent(
+                            parts = listOf(com.example.data.GeminiPart(text = outputText))
+                        )
+                    )
+                ),
+                modelVersion = openAiResp.model ?: "gpt-4o-mini"
+            )
+            return Pair(convertedResponse, openAiResp.model ?: "gpt-4o-mini")
+        }
+
+        // Google Gemini API execution (with fallback models)
         return try {
-            val response = NetworkClient.geminiApi.generateContent(apiKey, request)
+            val response = NetworkClient.geminiApi.generateContent(cleanKey, request)
             Pair(response, response.modelVersion ?: "gemini-2.5-flash")
         } catch (e1: Exception) {
             try {
-                val response = NetworkClient.geminiApi.generateContentWithModel("gemini-2.5-pro", apiKey, request)
+                val response = NetworkClient.geminiApi.generateContentWithModel("gemini-2.5-pro", cleanKey, request)
                 Pair(response, response.modelVersion ?: "gemini-2.5-pro")
             } catch (e2: Exception) {
-                val response = NetworkClient.geminiApi.generateContentWithModel("gemini-1.5-flash", apiKey, request)
+                val response = NetworkClient.geminiApi.generateContentWithModel("gemini-1.5-flash", cleanKey, request)
                 Pair(response, response.modelVersion ?: "gemini-1.5-flash")
             }
         }

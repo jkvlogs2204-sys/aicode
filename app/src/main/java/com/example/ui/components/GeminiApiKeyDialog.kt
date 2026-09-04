@@ -145,7 +145,7 @@ fun GeminiApiKeyDialog(
                                     ) {
                                         Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = EcoBadgeGood, modifier = Modifier.size(12.dp))
                                         Spacer(modifier = Modifier.width(4.dp))
-                                        Text("GEMINI 3.5 FLASH", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = EcoBadgeGood)
+                                        Text("GEMINI & CHATGPT AI", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = EcoBadgeGood)
                                     }
                                 }
 
@@ -166,14 +166,14 @@ fun GeminiApiKeyDialog(
                             Spacer(modifier = Modifier.height(8.dp))
 
                             Text(
-                                text = "Google Gemini AI Settings",
+                                text = "Gemini & ChatGPT AI Settings",
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
                             )
 
                             Text(
-                                text = "Configured for all users across the entire app. Enter your API key below or retrieve one for free from Google AI Studio.",
+                                text = "Supports both Google Gemini API keys (AIzaSy...) and OpenAI ChatGPT API keys (sk-...). Enter your API key below.",
                                 fontSize = 11.sp,
                                 color = Color.White.copy(alpha = 0.8f)
                             )

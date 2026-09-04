@@ -118,6 +118,35 @@ interface GeminiApiService {
     ): GeminiResponse
 }
 
+// OpenAI ChatGPT REST API Data Classes
+data class OpenAiMessage(
+    val role: String,
+    val content: String
+)
+
+data class OpenAiRequest(
+    val model: String = "gpt-4o-mini",
+    val messages: List<OpenAiMessage>,
+    val temperature: Float = 0.2f
+)
+
+data class OpenAiResponse(
+    val choices: List<OpenAiChoice>?,
+    val model: String? = null
+)
+
+data class OpenAiChoice(
+    val message: OpenAiMessage?
+)
+
+interface OpenAiApiService {
+    @POST("v1/chat/completions")
+    suspend fun createChatCompletion(
+        @retrofit2.http.Header("Authorization") authHeader: String,
+        @Body request: OpenAiRequest
+    ): OpenAiResponse
+}
+
 object NetworkClient {
     private val moshi = Moshi.Builder()
         .addLast(KotlinJsonAdapterFactory())
@@ -128,7 +157,7 @@ object NetworkClient {
         .readTimeout(15, TimeUnit.SECONDS)
         .build()
 
-    // 60-second timeouts recommended for Gemini AI API calls
+    // 60-second timeouts recommended for Gemini AI / OpenAI API calls
     private val geminiOkHttpClient = OkHttpClient.Builder()
         .connectTimeout(60, TimeUnit.SECONDS)
         .readTimeout(60, TimeUnit.SECONDS)
@@ -158,5 +187,14 @@ object NetworkClient {
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
             .create(GeminiApiService::class.java)
+    }
+
+    val openAiApi: OpenAiApiService by lazy {
+        Retrofit.Builder()
+            .baseUrl("https://api.openai.com/")
+            .client(geminiOkHttpClient)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+            .create(OpenAiApiService::class.java)
     }
 }
