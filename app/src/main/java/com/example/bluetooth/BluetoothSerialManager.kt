@@ -399,11 +399,29 @@ class BluetoothSerialManager(private val context: Context) {
     }
 
     private suspend fun parseSerialMessage(raw: String) {
-        val upper = raw.uppercase()
+        val trimmed = raw.trim()
+        if (trimmed.isEmpty()) return
+
+        val upper = trimmed.uppercase()
+        val cleaned = upper
+            .replace("PRODUCT:", "")
+            .replace("RFID:", "")
+            .replace("CARD UID:", "")
+            .replace("TAG UID:", "")
+            .replace("UID:", "")
+            .replace("TAG:", "")
+            .replace("CARD:", "")
+            .replace("SCAN:", "")
+            .trim()
+
+        val sanitized = if (cleaned.contains(":") || cleaned.contains("-") || cleaned.contains(" ")) {
+            cleaned.replace(":", "").replace("-", "").replace(" ", "").trim()
+        } else {
+            cleaned
+        }
+
         val productId = when {
-            upper.startsWith("PRODUCT:") -> upper.removePrefix("PRODUCT:").trim()
-            upper.startsWith("RFID:") -> upper.removePrefix("RFID:").trim()
-            upper.matches(Regex("^[0-9A-Z]{3,12}$")) -> upper.trim()
+            sanitized.length in 2..32 && sanitized.matches(Regex("^[0-9A-Z_]+$")) -> sanitized
             else -> null
         }
 

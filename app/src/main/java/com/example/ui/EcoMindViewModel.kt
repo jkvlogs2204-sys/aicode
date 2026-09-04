@@ -482,6 +482,8 @@ class EcoMindViewModel(application: Application) : AndroidViewModel(application)
                 product = repository.fetchFromRemoteBackend(_backendUrl.value, cleanUid)
             }
 
+            val scanSource = if (bluetoothState.value is BluetoothState.Connected) "HC-05 Bluetooth" else "RFID Reader"
+
             if (product != null) {
                 _scannedProduct.value = product
                 repository.addScanHistory(
@@ -489,25 +491,45 @@ class EcoMindViewModel(application: Application) : AndroidViewModel(application)
                     productName = product.name,
                     category = product.category,
                     ecoScore = product.ecoScore,
-                    source = if (bluetoothState.value is BluetoothState.Connected) "HC-05 Bluetooth" else "RFID Reader"
+                    source = scanSource
                 )
                 generateAiAnalysis(product)
-
-                // Note: Hardware communication is strictly unidirectional (Arduino -> App).
-                // No return commands (GREEN/YELLOW/RED) are transmitted back to Arduino.
             } else {
-                _scannedProduct.value = ProductEntity(
+                val initialEntity = ProductEntity(
                     id = cleanUid,
-                    name = "Unknown Product ($cleanUid)",
-                    category = "Uncategorized",
-                    carbon = "150g CO2",
-                    water = "5 litres",
-                    ecoScore = 50,
-                    recycling = "Check local municipality rules",
-                    impact = "Product ID $cleanUid is not yet registered in database.",
-                    alternative = "Search registered eco alternatives",
-                    isEcoFriendly = false
+                    name = "Scanned Tag ($cleanUid)",
+                    category = "Plastic",
+                    carbon = "120g CO2",
+                    water = "4.5 litres",
+                    ecoScore = 60,
+                    recycling = "Consult local recycling municipal guidelines",
+                    impact = "RFID Tag $cleanUid scanned over HC-05. Fetching AI environmental analysis...",
+                    alternative = "Reusable or eco-friendly alternative",
+                    isEcoFriendly = true
                 )
+                _scannedProduct.value = initialEntity
+                repository.addScanHistory(
+                    productId = cleanUid,
+                    productName = initialEntity.name,
+                    category = initialEntity.category,
+                    ecoScore = initialEntity.ecoScore,
+                    source = scanSource
+                )
+                generateAiAnalysis(initialEntity)
+
+                // Query ChatGPT AI in background to fetch detailed environmental specifications
+                viewModelScope.launch {
+                    try {
+                        val aiProduct = ChatGptEcoAssistant.fetchProductDetailsViaChatGpt(cleanUid)
+                        val finalProduct = aiProduct.copy(id = cleanUid)
+                        repository.updateProduct(finalProduct)
+                        _scannedProduct.value = finalProduct
+                        generateAiAnalysis(finalProduct)
+                        Log.d("EcoMindViewModel", "Auto-registered scanned RFID tag $cleanUid via ChatGPT AI")
+                    } catch (e: Exception) {
+                        Log.w("EcoMindViewModel", "AI auto-lookup for RFID tag $cleanUid failed: ${e.message}")
+                    }
+                }
             }
         }
     }
