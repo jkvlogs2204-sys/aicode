@@ -97,20 +97,36 @@ object GeminiEcoAssistant {
 
     fun getApiKey(): String {
         if (customApiKey.isNotBlank()) {
-            return customApiKey
+            return customApiKey.trim().removeSurrounding("\"", "\"").removeSurrounding("'", "'")
         }
         val key = BuildConfig.GEMINI_API_KEY
-        return if (key.isNotBlank() && key != "MY_GEMINI_API_KEY") key.trim() else ""
+        val cleanKey = key.trim().removeSurrounding("\"", "\"").removeSurrounding("'", "'")
+        return if (cleanKey.isNotBlank() && cleanKey != "MY_GEMINI_API_KEY") cleanKey else ""
     }
 
     fun isGeminiConfigured(): Boolean = getApiKey().isNotEmpty()
+
+    private suspend fun executeGeminiRequest(apiKey: String, request: GeminiRequest): Pair<com.example.data.GeminiResponse, String> {
+        return try {
+            val response = NetworkClient.geminiApi.generateContent(apiKey, request)
+            Pair(response, response.modelVersion ?: "gemini-2.5-flash")
+        } catch (e1: Exception) {
+            try {
+                val response = NetworkClient.geminiApi.generateContentWithModel("gemini-2.5-pro", apiKey, request)
+                Pair(response, response.modelVersion ?: "gemini-2.5-pro")
+            } catch (e2: Exception) {
+                val response = NetworkClient.geminiApi.generateContentWithModel("gemini-1.5-flash", apiKey, request)
+                Pair(response, response.modelVersion ?: "gemini-1.5-flash")
+            }
+        }
+    }
 
     suspend fun testGeminiConnection(): GeminiConnectionTestResult = withContext(Dispatchers.IO) {
         val apiKey = getApiKey()
         if (apiKey.isEmpty()) {
             return@withContext GeminiConnectionTestResult(
                 success = false,
-                model = "gemini-3.5-flash",
+                model = "gemini-2.5-flash",
                 latencyMs = 0,
                 responseText = "",
                 errorMessage = "Gemini API key is not configured. Please enter your API key in Settings or AI Guide."
@@ -131,13 +147,13 @@ object GeminiEcoAssistant {
                     maxOutputTokens = 30
                 )
             )
-            val response = NetworkClient.geminiApi.generateContent(apiKey, request)
+            val (response, usedModel) = executeGeminiRequest(apiKey, request)
             val latency = System.currentTimeMillis() - startTime
             val text = response.candidates?.firstOrNull()?.content?.parts?.firstOrNull { !it.text.isNullOrBlank() }?.text
                 ?: "Eco Mind AI connected."
             GeminiConnectionTestResult(
                 success = true,
-                model = response.modelVersion ?: "gemini-3.5-flash",
+                model = usedModel,
                 latencyMs = latency,
                 responseText = text.trim(),
                 errorMessage = null
@@ -146,7 +162,7 @@ object GeminiEcoAssistant {
             val latency = System.currentTimeMillis() - startTime
             GeminiConnectionTestResult(
                 success = false,
-                model = "gemini-3.5-flash",
+                model = "gemini-2.5-flash",
                 latencyMs = latency,
                 responseText = "",
                 errorMessage = e.localizedMessage ?: e.message ?: "Connection error"
@@ -187,7 +203,7 @@ object GeminiEcoAssistant {
                         parts = listOf(GeminiPart(text = "You are Eco Mind, an expert environmental recycling and sustainability AI."))
                     )
                 )
-                val response = NetworkClient.geminiApi.generateContent(apiKey, request)
+                val (response, _) = executeGeminiRequest(apiKey, request)
                 val aiText = response.candidates?.firstOrNull()?.content?.parts?.firstOrNull { !it.text.isNullOrBlank() }?.text
                 if (!aiText.isNullOrEmpty()) {
                     return@withContext parseGeminiProductResponse(aiText, productQuery, generatedId)
@@ -407,7 +423,7 @@ object GeminiEcoAssistant {
                         parts = listOf(GeminiPart(text = "You are Eco Mind, an expert environmental sustainability and lifecycle assessment AI."))
                     )
                 )
-                val response = NetworkClient.geminiApi.generateContent(apiKey, request)
+                val (response, _) = executeGeminiRequest(apiKey, request)
                 val aiText = response.candidates?.firstOrNull()?.content?.parts?.firstOrNull { !it.text.isNullOrBlank() }?.text
                 if (!aiText.isNullOrEmpty()) {
                     return@withContext parseAiResponse(aiText, product)
@@ -469,7 +485,7 @@ object GeminiEcoAssistant {
                     )
                 )
 
-                val response = NetworkClient.geminiApi.generateContent(apiKey, request)
+                val (response, _) = executeGeminiRequest(apiKey, request)
                 val aiText = response.candidates?.firstOrNull()?.content?.parts?.firstOrNull { !it.text.isNullOrBlank() }?.text
                 if (!aiText.isNullOrEmpty()) {
                     return@withContext aiText.trim()
