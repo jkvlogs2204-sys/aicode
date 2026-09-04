@@ -193,14 +193,14 @@ class EcoMindViewModel(application: Application) : AndroidViewModel(application)
     private val _isAiLoading = MutableStateFlow<Boolean>(false)
     val isAiLoading: StateFlow<Boolean> = _isAiLoading.asStateFlow()
 
-    private val _isGeminiFetchingProduct = MutableStateFlow(false)
-    val isGeminiFetchingProduct: StateFlow<Boolean> = _isGeminiFetchingProduct.asStateFlow()
+    private val _isChatGptFetchingProduct = MutableStateFlow(false)
+    val isChatGptFetchingProduct: StateFlow<Boolean> = _isChatGptFetchingProduct.asStateFlow()
 
-    private val _geminiFetchStatus = MutableStateFlow<String?>(null)
-    val geminiFetchStatus: StateFlow<String?> = _geminiFetchStatus.asStateFlow()
+    private val _chatGptFetchStatus = MutableStateFlow<String?>(null)
+    val chatGptFetchStatus: StateFlow<String?> = _chatGptFetchStatus.asStateFlow()
 
-    private val _geminiFetchedProduct = MutableStateFlow<ProductEntity?>(null)
-    val geminiFetchedProduct: StateFlow<ProductEntity?> = _geminiFetchedProduct.asStateFlow()
+    private val _chatGptFetchedProduct = MutableStateFlow<ProductEntity?>(null)
+    val chatGptFetchedProduct: StateFlow<ProductEntity?> = _chatGptFetchedProduct.asStateFlow()
 
     private val _searchQuery = MutableStateFlow<String>("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
@@ -229,30 +229,30 @@ class EcoMindViewModel(application: Application) : AndroidViewModel(application)
     private val _isChatLoading = MutableStateFlow(false)
     val isChatLoading: StateFlow<Boolean> = _isChatLoading.asStateFlow()
 
-    private val _geminiConnectionStatus = MutableStateFlow<com.example.ai.ChatGptConnectionTestResult?>(null)
-    val geminiConnectionStatus: StateFlow<com.example.ai.ChatGptConnectionTestResult?> = _geminiConnectionStatus.asStateFlow()
+    private val _chatGptConnectionStatus = MutableStateFlow<com.example.ai.ChatGptConnectionTestResult?>(null)
+    val chatGptConnectionStatus: StateFlow<com.example.ai.ChatGptConnectionTestResult?> = _chatGptConnectionStatus.asStateFlow()
 
-    private val _isTestingGemini = MutableStateFlow(false)
-    val isTestingGemini: StateFlow<Boolean> = _isTestingGemini.asStateFlow()
+    private val _isTestingChatGpt = MutableStateFlow(false)
+    val isTestingChatGpt: StateFlow<Boolean> = _isTestingChatGpt.asStateFlow()
 
-    private val _geminiApiKeySource = MutableStateFlow<String>(ChatGptEcoAssistant.getActiveKeySource())
-    val geminiApiKeySource: StateFlow<String> = _geminiApiKeySource.asStateFlow()
+    private val _chatGptApiKeySource = MutableStateFlow<String>(ChatGptEcoAssistant.getActiveKeySource())
+    val chatGptApiKeySource: StateFlow<String> = _chatGptApiKeySource.asStateFlow()
 
-    private val _isGeminiConfigured = MutableStateFlow<Boolean>(ChatGptEcoAssistant.isChatGptConfigured())
-    val isGeminiConfigured: StateFlow<Boolean> = _isGeminiConfigured.asStateFlow()
+    private val _isChatGptConfigured = MutableStateFlow<Boolean>(ChatGptEcoAssistant.isChatGptConfigured())
+    val isChatGptConfigured: StateFlow<Boolean> = _isChatGptConfigured.asStateFlow()
 
-    fun updateGeminiApiKey(newKey: String) {
+    fun updateChatGptApiKey(newKey: String) {
         ChatGptEcoAssistant.setCustomApiKey(getApplication(), newKey)
-        _geminiApiKeySource.value = ChatGptEcoAssistant.getActiveKeySource()
-        _isGeminiConfigured.value = ChatGptEcoAssistant.isChatGptConfigured()
-        testGeminiApiLive()
+        _chatGptApiKeySource.value = ChatGptEcoAssistant.getActiveKeySource()
+        _isChatGptConfigured.value = ChatGptEcoAssistant.isChatGptConfigured()
+        testChatGptApiLive()
     }
 
-    fun clearGeminiApiKey() {
+    fun clearChatGptApiKey() {
         ChatGptEcoAssistant.clearCustomApiKey(getApplication())
-        _geminiApiKeySource.value = ChatGptEcoAssistant.getActiveKeySource()
-        _isGeminiConfigured.value = ChatGptEcoAssistant.isChatGptConfigured()
-        testGeminiApiLive()
+        _chatGptApiKeySource.value = ChatGptEcoAssistant.getActiveKeySource()
+        _isChatGptConfigured.value = ChatGptEcoAssistant.isChatGptConfigured()
+        testChatGptApiLive()
     }
 
     private val _chatMessages = MutableStateFlow<List<ChatMessage>>(
@@ -307,9 +307,9 @@ class EcoMindViewModel(application: Application) : AndroidViewModel(application)
             generateSustainabilityAdviceFromFirestore()
         }
 
-        // Initial Gemini AI API verification
+        // Initial ChatGPT AI API verification
         viewModelScope.launch {
-            testGeminiApiLive()
+            testChatGptApiLive()
         }
 
         // Listen for incoming Bluetooth serial RFID tag scans
@@ -566,22 +566,22 @@ class EcoMindViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun fetchAndCreateProductWithGemini(query: String, onResult: ((ProductEntity) -> Unit)? = null) {
+    fun fetchAndCreateProductWithChatGpt(query: String, onResult: ((ProductEntity) -> Unit)? = null) {
         if (query.isBlank()) return
         viewModelScope.launch {
-            _isGeminiFetchingProduct.value = true
-            _geminiFetchStatus.value = "Connecting to AI API: Calculating recycling methods, carbon footprint & water impact for '$query'..."
+            _isChatGptFetchingProduct.value = true
+            _chatGptFetchStatus.value = "Connecting to ChatGPT API (gpt-4o-mini): Calculating recycling methods, carbon footprint & water impact for '$query'..."
             val fetched = ChatGptEcoAssistant.fetchProductDetailsViaChatGpt(query)
             
             // Save into local Room DB and Cloud Firestore
             repository.updateProduct(fetched)
             
-            _geminiFetchedProduct.value = fetched
+            _chatGptFetchedProduct.value = fetched
             _scannedProduct.value = fetched
             generateAiAnalysis(fetched)
             
-            _isGeminiFetchingProduct.value = false
-            _geminiFetchStatus.value = "Successfully fetched '${fetched.name}' via AI!"
+            _isChatGptFetchingProduct.value = false
+            _chatGptFetchStatus.value = "Successfully fetched '${fetched.name}' via ChatGPT AI!"
             onResult?.invoke(fetched)
         }
     }
@@ -680,14 +680,14 @@ class EcoMindViewModel(application: Application) : AndroidViewModel(application)
         )
     }
 
-    fun testGeminiApiLive() {
+    fun testChatGptApiLive() {
         viewModelScope.launch {
-            _isTestingGemini.value = true
+            _isTestingChatGpt.value = true
             val result = ChatGptEcoAssistant.testChatGptConnection()
-            _geminiConnectionStatus.value = result
-            _isTestingGemini.value = false
-            _isGeminiConfigured.value = ChatGptEcoAssistant.isChatGptConfigured()
-            _geminiApiKeySource.value = ChatGptEcoAssistant.getActiveKeySource()
+            _chatGptConnectionStatus.value = result
+            _isTestingChatGpt.value = false
+            _isChatGptConfigured.value = ChatGptEcoAssistant.isChatGptConfigured()
+            _chatGptApiKeySource.value = ChatGptEcoAssistant.getActiveKeySource()
         }
     }
 

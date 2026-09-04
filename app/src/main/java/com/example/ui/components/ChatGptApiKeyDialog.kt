@@ -75,10 +75,10 @@ fun ChatGptApiKeyDialog(
 ) {
     val context = LocalContext.current
     val clipboardManager = LocalClipboardManager.current
-    val chatGptStatus by viewModel.geminiConnectionStatus.collectAsState()
-    val isTesting by viewModel.isTestingGemini.collectAsState()
-    val isConfigured by viewModel.isGeminiConfigured.collectAsState()
-    val keySource by viewModel.geminiApiKeySource.collectAsState()
+    val chatGptStatus by viewModel.chatGptConnectionStatus.collectAsState()
+    val isTesting by viewModel.isTestingChatGpt.collectAsState()
+    val isConfigured by viewModel.isChatGptConfigured.collectAsState()
+    val keySource by viewModel.chatGptApiKeySource.collectAsState()
 
     var keyInput by remember { mutableStateOf("") }
     var isKeyVisible by remember { mutableStateOf(false) }
@@ -258,7 +258,7 @@ fun ChatGptApiKeyDialog(
                     Button(
                         onClick = {
                             if (keyInput.isNotBlank()) {
-                                viewModel.updateGeminiApiKey(keyInput.trim())
+                                viewModel.updateChatGptApiKey(keyInput.trim())
                                 Toast.makeText(context, "ChatGPT API key updated and tested!", Toast.LENGTH_SHORT).show()
                                 keyInput = ""
                             }
@@ -276,7 +276,7 @@ fun ChatGptApiKeyDialog(
 
                     OutlinedButton(
                         onClick = {
-                            viewModel.clearGeminiApiKey()
+                            viewModel.clearChatGptApiKey()
                             Toast.makeText(context, "Custom key removed.", Toast.LENGTH_SHORT).show()
                             keyInput = ""
                         },
@@ -295,7 +295,7 @@ fun ChatGptApiKeyDialog(
 
                 // Live Connection Test Button
                 OutlinedButton(
-                    onClick = { viewModel.testGeminiApiLive() },
+                    onClick = { viewModel.testChatGptApiLive() },
                     enabled = !isTesting,
                     modifier = Modifier
                         .fillMaxWidth()

@@ -84,9 +84,9 @@ fun AiGuideScreen(
     val allProducts by viewModel.allProducts.collectAsState()
     val bleSensorData by viewModel.bleLatestSensorData.collectAsState()
     val roomSensorHistory by viewModel.roomSensorHistory.collectAsState()
-    val chatGptConnectionStatus by viewModel.geminiConnectionStatus.collectAsState()
-    val isTestingChatGpt by viewModel.isTestingGemini.collectAsState()
-    val isChatGptConfigured by viewModel.isGeminiConfigured.collectAsState()
+    val chatGptConnectionStatus by viewModel.chatGptConnectionStatus.collectAsState()
+    val isTestingChatGpt by viewModel.isTestingChatGpt.collectAsState()
+    val isChatGptConfigured by viewModel.isChatGptConfigured.collectAsState()
 
     var inputText by remember { mutableStateOf("") }
     var showChartsSection by remember { mutableStateOf(false) }
@@ -173,7 +173,7 @@ fun AiGuideScreen(
                                 Spacer(modifier = Modifier.width(6.dp))
 
                                 OutlinedButton(
-                                    onClick = { viewModel.testGeminiApiLive() },
+                                    onClick = { viewModel.testChatGptApiLive() },
                                     enabled = !isTestingChatGpt,
                                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                                     modifier = Modifier.testTag("btn_test_chatgpt_api")

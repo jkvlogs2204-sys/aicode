@@ -141,7 +141,7 @@ fun ProductEditDialog(
                     colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = EcoBadgeGood),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .testTag("btn_autofill_gemini")
+                        .testTag("btn_autofill_chatgpt")
                 ) {
                     if (isAiFetching) {
                         CircularProgressIndicator(modifier = Modifier.size(16.dp), color = androidx.compose.ui.graphics.Color.Black, strokeWidth = 2.dp)

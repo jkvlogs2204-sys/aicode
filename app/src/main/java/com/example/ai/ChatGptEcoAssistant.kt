@@ -106,7 +106,7 @@ object ChatGptEcoAssistant {
         if (customApiKey.isNotBlank()) {
             return customApiKey.trim().removeSurrounding("\"", "\"").removeSurrounding("'", "'")
         }
-        val key = try { BuildConfig.GEMINI_API_KEY } catch (_: Exception) { "" }
+        val key = try { BuildConfig.OPENAI_API_KEY } catch (_: Exception) { "" }
         val cleanKey = key.trim().removeSurrounding("\"", "\"").removeSurrounding("'", "'")
         if (cleanKey.isNotBlank() && !cleanKey.contains("MY_")) {
             return cleanKey

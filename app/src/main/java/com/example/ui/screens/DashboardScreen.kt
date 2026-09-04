@@ -793,7 +793,7 @@ private fun ProductDashboardCard(
                 }
             }
 
-            // 4. Gemini AI Insights & Sustainability Advice
+            // 4. ChatGPT AI Insights & Sustainability Advice
             Card(
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
